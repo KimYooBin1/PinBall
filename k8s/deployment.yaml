@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinball
+  namespace: pinball
+  labels:
+    app.kubernetes.io/name: pinball
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pinball
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pinball
+    spec:
+      containers:
+        - name: pinball
+          image: pinball:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: pinball-secrets
+          ports:
+            - name: http
+              containerPort: 3000

@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import { getUniqueEligibleUsers } from "./reactions.js";
 import { handlePinballCommand } from "./workflows.js";
+
+vi.mock("./reactions.js", () => ({
+  getUniqueEligibleUsers: vi.fn()
+}));
 
 function createCommandArgs(text: string) {
   return {
@@ -41,5 +46,21 @@ describe("handlePinballCommand", () => {
       text: expect.stringContaining("17:00")
     });
     expect(args.client.chat.postMessage).not.toHaveBeenCalled();
+  });
+
+  it("announces a failure when eligible users are fewer than requested", async () => {
+    vi.useFakeTimers();
+    vi.mocked(getUniqueEligibleUsers).mockResolvedValue(["U1"]);
+    const args = createCommandArgs("2");
+    const logger = createLogger();
+
+    await handlePinballCommand(args, logger);
+    await vi.runAllTimersAsync();
+
+    expect(args.client.chat.postMessage).toHaveBeenCalledWith({
+      channel: "C123",
+      text: expect.stringContaining("2명을 요청했지만 eligible 참가자는 1명뿐입니다")
+    });
+    vi.useRealTimers();
   });
 });
