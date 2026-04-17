@@ -3,6 +3,7 @@ import type { WebClient } from "@slack/web-api";
 import { drawWinners } from "../domain/picker.js";
 import {
   buildDailyRecruitmentMessage,
+  buildInsufficientParticipantsMessage,
   buildPinballHelpMessage,
   buildPinballRecruitmentMessage,
   buildWinnerAnnouncement
@@ -138,8 +139,15 @@ export async function handlePinballCommand(
         return;
       }
 
-      const adjustedWinnerCount = Math.min(winnerCount, candidates.length);
-      const winners = drawWinners(candidates, adjustedWinnerCount);
+      if (candidates.length < winnerCount) {
+        await args.client.chat.postMessage({
+          channel: args.command.channel_id,
+          text: buildInsufficientParticipantsMessage(winnerCount, candidates.length)
+        });
+        return;
+      }
+
+      const winners = drawWinners(candidates, winnerCount);
 
       await announceWinners(
         args.client,

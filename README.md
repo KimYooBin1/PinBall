@@ -39,7 +39,25 @@ Recommended bot scopes:
 - The daily post and draw use the `SLACK_DEFAULT_CHANNEL_ID` channel.
 - Slash-command initiated draws use a three-minute in-process timer.
 - `/pinball help` replies with an ephemeral usage guide.
+- If fewer eligible users react than requested by `/pinball n`, the bot posts a failure message and does not draw.
 - Pending timers and the latest daily message timestamp are stored in memory only for this initial version.
+
+## EKS Deployment
+The repository includes a minimal Kubernetes deployment under `k8s/`.
+
+Create the runtime secret from local environment values:
+```bash
+kubectl create namespace pinball
+kubectl create secret generic pinball-secrets \
+  --namespace pinball \
+  --from-env-file=.env
+```
+
+Apply the manifests and set the image built for your registry:
+```bash
+kubectl apply -f k8s/
+kubectl set image deployment/pinball pinball=<registry>/pinball:<tag> -n pinball
+```
 
 ## Commands
 ```bash

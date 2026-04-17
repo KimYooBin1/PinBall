@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { App, LogLevel } from "@slack/bolt";
 import cron from "node-cron";
 import { loadConfig } from "./slack/config.js";

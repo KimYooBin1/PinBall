@@ -24,3 +24,10 @@ export function buildWinnerAnnouncement(winners: string[], context: string): str
   const mentions = winners.map((winner) => `<@${winner}>`).join(", ");
   return `${context} ${mentions}`;
 }
+
+export function buildInsufficientParticipantsMessage(
+  requestedCount: number,
+  availableCount: number
+): string {
+  return `PinBall draw: ${requestedCount}명을 요청했지만 eligible 참가자는 ${availableCount}명뿐입니다. 추첨을 진행하지 않습니다.`;
+}
