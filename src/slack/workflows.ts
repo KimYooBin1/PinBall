@@ -3,6 +3,7 @@ import type { WebClient } from "@slack/web-api";
 import { drawWinners } from "../domain/picker.js";
 import {
   buildDailyRecruitmentMessage,
+  buildPinballHelpMessage,
   buildPinballRecruitmentMessage,
   buildWinnerAnnouncement
 } from "./messages.js";
@@ -89,14 +90,23 @@ export async function handlePinballCommand(
   args: SlackCommandMiddlewareArgs & { client: WebClient },
   logger: Logger
 ): Promise<void> {
+  const trimmedText = args.command.text.trim().toLowerCase();
   const winnerCount = parseWinnerCount(args.command.text);
 
   await args.ack();
 
+  if (trimmedText === "help") {
+    await args.respond({
+      response_type: "ephemeral",
+      text: buildPinballHelpMessage()
+    });
+    return;
+  }
+
   if (!winnerCount) {
     await args.respond({
       response_type: "ephemeral",
-      text: "Usage: /pinball <positive-number>"
+      text: "Usage: /pinball <positive-number> or /pinball help"
     });
     return;
   }
