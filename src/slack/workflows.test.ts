@@ -59,7 +59,7 @@ describe("handlePinballCommand", () => {
 
     expect(args.client.chat.postMessage).toHaveBeenCalledWith({
       channel: "C123",
-      text: expect.stringContaining("2명을 요청했지만 eligible 참가자는 1명뿐입니다")
+      text: expect.stringContaining("2명을 뽑아야 하는데 참가자가 1명뿐이에요")
     });
     vi.useRealTimers();
   });

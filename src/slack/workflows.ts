@@ -79,12 +79,12 @@ export async function drawDailyWinner(
   );
 
   if (candidates.length === 0) {
-    await announceNoParticipants(client, channel, "Dinner decider draw:");
+    await announceNoParticipants(client, channel, "오늘의 저녁 결정자");
     return;
   }
 
   const winners = drawWinners(candidates, 1);
-  await announceWinners(client, channel, "Dinner decider draw:", winners);
+  await announceWinners(client, channel, "오늘의 저녁 결정자", winners);
 }
 
 export async function handlePinballCommand(
@@ -107,7 +107,7 @@ export async function handlePinballCommand(
   if (!winnerCount) {
     await args.respond({
       response_type: "ephemeral",
-      text: "Usage: /pinball <positive-number> or /pinball help"
+      text: "사용법: `/pinball <양의 숫자>` 또는 `/pinball help`를 입력해주세요. 핀볼은 숫자를 좋아합니다."
     });
     return;
   }
@@ -134,7 +134,7 @@ export async function handlePinballCommand(
         await announceNoParticipants(
           args.client,
           args.command.channel_id,
-          "PinBall draw:"
+          "핀볼 추첨"
         );
         return;
       }
@@ -152,7 +152,7 @@ export async function handlePinballCommand(
       await announceWinners(
         args.client,
         args.command.channel_id,
-        "PinBall draw:",
+        "핀볼 추첨",
         winners
       );
     } catch (error) {
