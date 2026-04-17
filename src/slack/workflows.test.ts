@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { getUniqueEligibleUsers } from "./reactions.js";
-import { handlePinballCommand } from "./workflows.js";
+import { handleHelpCommand, handlePinballCommand } from "./workflows.js";
 
 vi.mock("./reactions.js", () => ({
   getUniqueEligibleUsers: vi.fn()
@@ -30,7 +30,7 @@ function createLogger() {
 }
 
 describe("handlePinballCommand", () => {
-  it("returns an ephemeral help message for `/pinball help`", async () => {
+  it("returns usage guidance when help is sent to `/pinball`", async () => {
     const args = createCommandArgs("help");
     const logger = createLogger();
 
@@ -39,11 +39,7 @@ describe("handlePinballCommand", () => {
     expect(args.ack).toHaveBeenCalledOnce();
     expect(args.respond).toHaveBeenCalledWith({
       response_type: "ephemeral",
-      text: expect.stringContaining("/pinball <number>")
-    });
-    expect(args.respond).toHaveBeenCalledWith({
-      response_type: "ephemeral",
-      text: expect.stringContaining("17:00")
+      text: expect.stringContaining("/help")
     });
     expect(args.client.chat.postMessage).not.toHaveBeenCalled();
   });
@@ -62,5 +58,25 @@ describe("handlePinballCommand", () => {
       text: expect.stringContaining("2명을 뽑아야 하는데 참가자가 1명뿐이에요")
     });
     vi.useRealTimers();
+  });
+});
+
+describe("handleHelpCommand", () => {
+  it("returns an ephemeral help message for `/help`", async () => {
+    const args = createCommandArgs("");
+    const logger = createLogger();
+
+    await handleHelpCommand(args, logger);
+
+    expect(args.ack).toHaveBeenCalledOnce();
+    expect(args.respond).toHaveBeenCalledWith({
+      response_type: "ephemeral",
+      text: expect.stringContaining("/help")
+    });
+    expect(args.respond).toHaveBeenCalledWith({
+      response_type: "ephemeral",
+      text: expect.stringContaining("17:00")
+    });
+    expect(args.client.chat.postMessage).not.toHaveBeenCalled();
   });
 });

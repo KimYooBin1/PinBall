@@ -91,23 +91,14 @@ export async function handlePinballCommand(
   args: SlackCommandMiddlewareArgs & { client: WebClient },
   logger: Logger
 ): Promise<void> {
-  const trimmedText = args.command.text.trim().toLowerCase();
   const winnerCount = parseWinnerCount(args.command.text);
 
   await args.ack();
 
-  if (trimmedText === "help") {
-    await args.respond({
-      response_type: "ephemeral",
-      text: buildPinballHelpMessage()
-    });
-    return;
-  }
-
   if (!winnerCount) {
     await args.respond({
       response_type: "ephemeral",
-      text: "사용법: `/pinball <양의 숫자>` 또는 `/pinball help`를 입력해주세요. 핀볼은 숫자를 좋아합니다."
+      text: "사용법: `/pinball <양의 숫자>`를 입력해주세요. 도움이 필요하면 `/help`를 불러주세요. 핀볼은 숫자를 좋아합니다."
     });
     return;
   }
@@ -163,4 +154,15 @@ export async function handlePinballCommand(
 
 export function createDailyState(): DailyState {
   return {};
+}
+
+export async function handleHelpCommand(
+  args: SlackCommandMiddlewareArgs,
+  _logger: Logger
+): Promise<void> {
+  await args.ack();
+  await args.respond({
+    response_type: "ephemeral",
+    text: buildPinballHelpMessage()
+  });
 }

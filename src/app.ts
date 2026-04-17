@@ -5,6 +5,7 @@ import { loadConfig } from "./slack/config.js";
 import {
   createDailyState,
   drawDailyWinner,
+  handleHelpCommand,
   handlePinballCommand,
   postDailyRecruitment
 } from "./slack/workflows.js";
@@ -23,6 +24,10 @@ const dailyState = createDailyState();
 
 app.command("/pinball", async (args) => {
   await handlePinballCommand(args, app.logger);
+});
+
+app.command("/help", async (args) => {
+  await handleHelpCommand(args, app.logger);
 });
 
 cron.schedule(

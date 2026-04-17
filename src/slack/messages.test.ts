@@ -21,6 +21,8 @@ describe("Slack bot messages", () => {
   it("explains help in Korean", () => {
     expect(buildPinballHelpMessage()).toContain("핀볼 사용법");
     expect(buildPinballHelpMessage()).toContain("/pinball <number>");
+    expect(buildPinballHelpMessage()).toContain("/help");
+    expect(buildPinballHelpMessage()).not.toContain("/pinball help");
   });
 
   it("announces no participants in Korean", () => {
