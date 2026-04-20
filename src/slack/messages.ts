@@ -3,15 +3,20 @@ export function buildDailyRecruitmentMessage(): string {
 }
 
 export function buildPinballRecruitmentMessage(winnerCount: number): string {
-  return `핀볼 굴러갑니다. 3분 안에 이모지로 탑승하면 ${winnerCount}명을 뽑아요. 늦으면 다음 판입니다.`;
+  return `핀볼 굴러갑니다. 1분 안에 이모지로 탑승하면 ${winnerCount}명을 뽑아요. 늦으면 다음 판입니다.`;
+}
+
+export function buildWeightedPinballRecruitmentMessage(winnerCount: number): string {
+  return `가중 핀볼 굴러갑니다. 1분 안에 이모지로 탑승하세요. 이모지 1개가 티켓 1장이고, 총 ${winnerCount}명을 뽑아요.`;
 }
 
 export function buildPinballHelpMessage(): string {
   return [
     "핀볼 사용법",
-    "- `/pinball <number>`: 3분 동안 이모지 참가자를 모으고, 지정한 인원을 랜덤으로 뽑아요.",
+    "- `/pinball <number>`: 1분 동안 이모지 참가자를 모으고, 사람당 한 표로 지정한 인원을 랜덤으로 뽑아요.",
+    "- `/pinball-weighted <number>`: 1분 동안 이모지 참가자를 모으고, 이모지 개수만큼 당첨 확률을 높여 뽑아요.",
     "- `/help`: 지금 보고 있는 도움말을 다시 보여줘요.",
-    "- 매일 17:00 KST에는 `오점뭐?` 모집을 열고, 17:30 KST에는 저녁 결정자 1명을 뽑습니다.",
+    "- 매일 17:00 KST에는 `오점뭐?` 모집을 열고, 17:10 KST에는 저녁 결정자 1명을 뽑습니다.",
     "- 이모지를 여러 개 눌러도 한 명으로만 세고, 봇 계정은 조용히 제외합니다."
   ].join("\n");
 }
@@ -23,6 +28,18 @@ export function buildWinnerAnnouncement(winners: string[], context: string): str
 
   const mentions = winners.map((winner) => `<@${winner}>`).join(", ");
   return `${context}: ${mentions} 님 당첨입니다. 오늘의 운명은 맡겼어요.`;
+}
+
+export function buildPinballWinnerAnnouncement(
+  winners: string[],
+  context: string
+): string {
+  if (winners.length === 0) {
+    return buildWinnerAnnouncement([], context);
+  }
+
+  const mentions = winners.map((winner) => `<@${winner}>`).join(", ");
+  return `${context}: ${mentions} 님 당첨입니다. 축하합니다! 핀볼이 콕 집었어요.`;
 }
 
 export function buildInsufficientParticipantsMessage(

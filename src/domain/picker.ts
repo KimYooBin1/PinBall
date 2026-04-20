@@ -42,3 +42,33 @@ export function drawWinners(
 
   return winners;
 }
+
+export function drawWeightedWinners(
+  tickets: string[],
+  winnerCount: number,
+  random: () => number = Math.random
+): string[] {
+  const uniqueCandidates = [...new Set(tickets)];
+
+  if (winnerCount < 1) {
+    throw new Error("Winner count must be at least 1.");
+  }
+
+  if (winnerCount > uniqueCandidates.length) {
+    throw new Error(
+      `Requested ${winnerCount} winners but only ${uniqueCandidates.length} candidates are available.`
+    );
+  }
+
+  let pool = [...tickets];
+  const winners: string[] = [];
+
+  while (winners.length < winnerCount) {
+    const index = Math.floor(random() * pool.length);
+    const winner = pool[index];
+    winners.push(winner);
+    pool = pool.filter((ticket) => ticket !== winner);
+  }
+
+  return winners;
+}
