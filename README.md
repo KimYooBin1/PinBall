@@ -4,8 +4,9 @@ PinBall is a Slack reaction-based picker bot. The first version supports a daily
 
 ## Features
 - Post a daily `오점뭐?` message at 5:00 PM KST
-- Pick one dinner decider from unique non-bot reactors at 5:30 PM KST
-- Handle `/pinball n` and pick `n` unique non-bot reactors after 3 minutes
+- Pick one dinner decider from unique non-bot reactors at 5:10 PM KST
+- Handle `/pinball n` and pick `n` unique non-bot reactors after 1 minute
+- Handle `/pinball-weighted n` and pick `n` unique non-bot reactors after 1 minute, with each emoji reaction counting as one ticket
 - Explain usage with `/help`
 - Deduplicate users who react with multiple emoji
 
@@ -21,7 +22,7 @@ PinBall is a Slack reaction-based picker bot. The first version supports a daily
 4. Start local development with `npm run dev`.
 
 ## Required Slack Capabilities
-- Slash commands: `/pinball`, `/help`
+- Slash commands: `/pinball`, `/pinball-weighted`, `/help`
 - Event subscriptions or Socket Mode support through Bolt
 - Bot scopes sufficient to post messages and read reactions
 
@@ -37,7 +38,7 @@ Recommended bot scopes:
 
 ## Runtime Behavior
 - The daily post and draw use the `SLACK_DEFAULT_CHANNEL_ID` channel.
-- Slash-command initiated draws use a three-minute in-process timer.
+- Slash-command initiated draws use a one-minute in-process timer.
 - `/help` replies with an ephemeral usage guide.
 - If fewer eligible users react than requested by `/pinball n`, the bot posts a failure message and does not draw.
 - Pending timers and the latest daily message timestamp are stored in memory only for this initial version.

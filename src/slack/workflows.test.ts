@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { getUniqueEligibleUsers } from "./reactions.js";
-import { handleHelpCommand, handlePinballCommand } from "./workflows.js";
+import { getUniqueEligibleUsers, getWeightedEligibleUsers } from "./reactions.js";
+import {
+  handleHelpCommand,
+  handlePinballCommand,
+  handleWeightedPinballCommand
+} from "./workflows.js";
 
 vi.mock("./reactions.js", () => ({
-  getUniqueEligibleUsers: vi.fn()
+  getUniqueEligibleUsers: vi.fn(),
+  getWeightedEligibleUsers: vi.fn()
 }));
 
 function createCommandArgs(text: string) {
@@ -51,11 +56,41 @@ describe("handlePinballCommand", () => {
     const logger = createLogger();
 
     await handlePinballCommand(args, logger);
-    await vi.runAllTimersAsync();
+    await vi.advanceTimersByTimeAsync(59_999);
+
+    expect(args.client.chat.postMessage).not.toHaveBeenCalledWith({
+      channel: "C123",
+      text: expect.stringContaining("2명을 뽑아야 하는데 참가자가 1명뿐이에요")
+    });
+
+    await vi.advanceTimersByTimeAsync(1);
 
     expect(args.client.chat.postMessage).toHaveBeenCalledWith({
       channel: "C123",
       text: expect.stringContaining("2명을 뽑아야 하는데 참가자가 1명뿐이에요")
+    });
+    vi.useRealTimers();
+  });
+});
+
+describe("handleWeightedPinballCommand", () => {
+  it("uses weighted reaction tickets after a one-minute wait", async () => {
+    vi.useFakeTimers();
+    vi.mocked(getWeightedEligibleUsers).mockResolvedValue(["U1", "U1", "U2"]);
+    const args = createCommandArgs("1");
+    const logger = createLogger();
+
+    await handleWeightedPinballCommand(args, logger);
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    expect(getWeightedEligibleUsers).toHaveBeenCalledWith(
+      args.client,
+      "C123",
+      "123.456"
+    );
+    expect(args.client.chat.postMessage).toHaveBeenCalledWith({
+      channel: "C123",
+      text: expect.stringContaining("축하합니다")
     });
     vi.useRealTimers();
   });

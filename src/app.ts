@@ -7,6 +7,7 @@ import {
   drawDailyWinner,
   handleHelpCommand,
   handlePinballCommand,
+  handleWeightedPinballCommand,
   postDailyRecruitment
 } from "./slack/workflows.js";
 
@@ -26,6 +27,10 @@ app.command("/pinball", async (args) => {
   await handlePinballCommand(args, app.logger);
 });
 
+app.command("/pinball-weighted", async (args) => {
+  await handleWeightedPinballCommand(args, app.logger);
+});
+
 app.command("/help", async (args) => {
   await handleHelpCommand(args, app.logger);
 });
@@ -43,7 +48,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  "30 17 * * *",
+  "10 17 * * *",
   async () => {
     try {
       await drawDailyWinner(app.client, config.defaultChannelId, dailyState, app.logger);

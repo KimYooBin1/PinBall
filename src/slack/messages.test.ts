@@ -4,6 +4,8 @@ import {
   buildInsufficientParticipantsMessage,
   buildPinballHelpMessage,
   buildPinballRecruitmentMessage,
+  buildPinballWinnerAnnouncement,
+  buildWeightedPinballRecruitmentMessage,
   buildWinnerAnnouncement
 } from "./messages.js";
 
@@ -15,12 +17,18 @@ describe("Slack bot messages", () => {
 
   it("uses playful Korean copy for slash-command recruitment", () => {
     expect(buildPinballRecruitmentMessage(2)).toContain("2명");
-    expect(buildPinballRecruitmentMessage(2)).toContain("3분");
+    expect(buildPinballRecruitmentMessage(2)).toContain("1분");
+  });
+
+  it("uses playful Korean copy for weighted slash-command recruitment", () => {
+    expect(buildWeightedPinballRecruitmentMessage(2)).toContain("2명");
+    expect(buildWeightedPinballRecruitmentMessage(2)).toContain("이모지 1개");
   });
 
   it("explains help in Korean", () => {
     expect(buildPinballHelpMessage()).toContain("핀볼 사용법");
     expect(buildPinballHelpMessage()).toContain("/pinball <number>");
+    expect(buildPinballHelpMessage()).toContain("/pinball-weighted <number>");
     expect(buildPinballHelpMessage()).toContain("/help");
     expect(buildPinballHelpMessage()).not.toContain("/pinball help");
   });
@@ -34,6 +42,12 @@ describe("Slack bot messages", () => {
   it("announces winners in Korean with mentions", () => {
     expect(buildWinnerAnnouncement(["U1", "U2"], "오늘의 저녁 결정자")).toBe(
       "오늘의 저녁 결정자: <@U1>, <@U2> 님 당첨입니다. 오늘의 운명은 맡겼어요."
+    );
+  });
+
+  it("announces command winners with a congratulatory draw tone", () => {
+    expect(buildPinballWinnerAnnouncement(["U1", "U2"], "핀볼 추첨")).toBe(
+      "핀볼 추첨: <@U1>, <@U2> 님 당첨입니다. 축하합니다! 핀볼이 콕 집었어요."
     );
   });
 

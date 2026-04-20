@@ -1,14 +1,18 @@
 import type { Logger, SlackCommandMiddlewareArgs } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
-import { drawWinners } from "../domain/picker.js";
+import { drawWeightedWinners, drawWinners } from "../domain/picker.js";
 import {
   buildDailyRecruitmentMessage,
   buildInsufficientParticipantsMessage,
   buildPinballHelpMessage,
   buildPinballRecruitmentMessage,
+  buildPinballWinnerAnnouncement,
+  buildWeightedPinballRecruitmentMessage,
   buildWinnerAnnouncement
 } from "./messages.js";
-import { getUniqueEligibleUsers } from "./reactions.js";
+import { getUniqueEligibleUsers, getWeightedEligibleUsers } from "./reactions.js";
+
+export const COMMAND_DRAW_DELAY_MS = 60 * 1000;
 
 interface DailyState {
   latestDailyMessageTs?: string;
@@ -40,11 +44,12 @@ async function announceWinners(
   client: WebClient,
   channel: string,
   context: string,
-  winners: string[]
+  winners: string[],
+  buildAnnouncement = buildWinnerAnnouncement
 ): Promise<void> {
   await client.chat.postMessage({
     channel,
-    text: buildWinnerAnnouncement(winners, context)
+    text: buildAnnouncement(winners, context)
   });
 }
 
@@ -144,12 +149,80 @@ export async function handlePinballCommand(
         args.client,
         args.command.channel_id,
         "핀볼 추첨",
-        winners
+        winners,
+        buildPinballWinnerAnnouncement
       );
     } catch (error) {
       logger.error(error);
     }
-  }, 3 * 60 * 1000);
+  }, COMMAND_DRAW_DELAY_MS);
+}
+
+export async function handleWeightedPinballCommand(
+  args: SlackCommandMiddlewareArgs & { client: WebClient },
+  logger: Logger
+): Promise<void> {
+  const winnerCount = parseWinnerCount(args.command.text);
+
+  await args.ack();
+
+  if (!winnerCount) {
+    await args.respond({
+      response_type: "ephemeral",
+      text: "사용법: `/pinball-weighted <양의 숫자>`를 입력해주세요. 이모지 1개가 티켓 1장입니다."
+    });
+    return;
+  }
+
+  const post = await args.client.chat.postMessage({
+    channel: args.command.channel_id,
+    text: buildWeightedPinballRecruitmentMessage(winnerCount)
+  });
+
+  setTimeout(async () => {
+    try {
+      if (!post.ts) {
+        logger.error("Cannot draw /pinball-weighted winners without a message timestamp.");
+        return;
+      }
+
+      const tickets = await getWeightedEligibleUsers(
+        args.client,
+        args.command.channel_id,
+        post.ts
+      );
+      const uniqueCandidates = [...new Set(tickets)];
+
+      if (uniqueCandidates.length === 0) {
+        await announceNoParticipants(
+          args.client,
+          args.command.channel_id,
+          "가중 핀볼 추첨"
+        );
+        return;
+      }
+
+      if (uniqueCandidates.length < winnerCount) {
+        await args.client.chat.postMessage({
+          channel: args.command.channel_id,
+          text: buildInsufficientParticipantsMessage(winnerCount, uniqueCandidates.length)
+        });
+        return;
+      }
+
+      const winners = drawWeightedWinners(tickets, winnerCount);
+
+      await announceWinners(
+        args.client,
+        args.command.channel_id,
+        "가중 핀볼 추첨",
+        winners,
+        buildPinballWinnerAnnouncement
+      );
+    } catch (error) {
+      logger.error(error);
+    }
+  }, COMMAND_DRAW_DELAY_MS);
 }
 
 export function createDailyState(): DailyState {
